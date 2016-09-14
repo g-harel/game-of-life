@@ -3,32 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <title>Life</title>
+    <script src="abiogenesis.js"></script>
     <style>
-        #container {
-            pointer-events: none;
-            height: 600px;
-            width: 600px;
+        body {
+            margin: 0;
         }
-        .row {
-            pointer-events: none;
-            width: 600px;
-            height: 6px;
+        td {
+            width: 20px;
+            height: 20px;
+            background: black;
         }
-        .cell {
-            width: 6px;
-            height: 6px;
-            display: inline-block;
-        }
-        .cell:hover {
-            background-color: red;
+        table {
+            background: #eee;
         }
     </style>
 </head>
 <body>
+    <button onclick="refresh(true);">step</button>
+    <button onclick="reset();">refresh</button>
+    <button onclick="clear();">clear</button>
     <div id="container"></div>
-    <button onclick="play();">play</button>
-    <button onclick="pause();">pause</button>
-    <button onclick="init();">refresh</button>
-    <script src="abiogenesis.js"></script>
 </body>
 </html>

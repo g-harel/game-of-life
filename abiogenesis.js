@@ -1,73 +1,72 @@
-let kill = true;
+let size = 30;
 
-let container = document.body.children[0];
-
-let cells = [];
-
-function update() {
-    let generation = cells.map(function(val) {
-        return val.map(function(val) {
-            return val.iterate();
-        });
+window.onload = function() {
+    window.container = document.getElementById('container');
+    container.addEventListener('mousedown', function(e) {
+        let source = e.srcElement;
+        let address = source.getAttribute('data-index').split('%');
+        let cell = cells[address[0]][address[1]];
+        cells[address[0]][address[1]] = !cell;
+        source.style.opacity = cell?0:1;
     });
-    let temp = '';
-    cells.forEach(function(val, i) {
-        temp+='<div class="row">';
-        val.forEach(function(val, j) {
-            if (!kill) {
-                val.state=generation[i][j];
-            }
-            temp+=val.render();
-        });
-        temp+='</div>';
-    });
-    container.innerHTML = temp;
-    if (!kill) {
-        window.requestAnimationFrame(update);
-    }
-}
-
-function play() {
-    kill = false;
-    window.requestAnimationFrame(update);
-}
-
-function pause() {
-    kill = true;
-}
-
-function init() {
-    for (let i = 0; i < 100; i++) {
-        cells[i] = [];
-        for (let j = 0; j < 100; j++) {
-            cells[i][j] = new cell(Math.random()>0.998, [i, j]);
+    let temp = '<table cellpadding="0" cellspacing="0">';
+    for (let i = 0; i < size; i++) {
+        temp += '<tr>';
+        for (let j = 0; j < size; j++) {
+            temp += `<td data-index=${i+'%'+j}></td>`;
         }
+        temp += '</tr>';
     }
-    kill = true;
-    update();
-}
-
-function cell(state, coord) {
-    this.state = !!state;
-    this.coord = coord || [0,0];
-}
-
-cell.prototype.render = function() {
-    return `<div class="cell" style="background-color:${this.state?'black':'white'}"></div>`;
+    container.innerHTML = temp;
+    reset();
 };
 
-cell.prototype.iterate = function() {
-    let counter = 0,
-        x = this.coord[0];
-        y = this.coord[1];
-    if (cells[x+1]  && cells[x+1][y+1]  && cells[x+1][y+1].state)   { counter++; }
-    if (cells[x+1]  && cells[x+1][y]    && cells[x+1][y].state)     { counter++; }
-    if (cells[x+1]  && cells[x+1][y-1]  && cells[x+1][y-1].state)   { counter++; }
-    if (cells[x]    && cells[x][y+1]    && cells[x][y+1].state)     { counter++; }
-    if (cells[x]    && cells[x][y-1]    && cells[x][y-1].state)     { counter++; }
-    if (cells[x-1]  && cells[x-1][y+1]  && cells[x-1][y+1].state)   { counter++; }
-    if (cells[x-1]  && cells[x-1][y]    && cells[x-1][y].state)     { counter++; }
-    if (cells[x-1]  && cells[x-1][y-1]  && cells[x-1][y-1].state)   { counter++; }
+let cells = [];
+function reset() {
+    for (let i = 0; i < size; i++) {
+        cells[i] = [];
+        for (let j = 0; j < size; j++) {
+            cells[i][j] = (Math.random()>1.5);
+        }
+    }
+    refresh(false);
+}
+
+function refresh(gen) {
+    let temp = [];
+    for (let i = 0; i < size; i++) {
+        temp[i] = [];
+        for (let j = 0; j < size; j++) {
+            temp[i][j] = iterate(gen, i, j);
+            container.children[0].children[0].children[i].children[j].style.opacity = temp[i][j]?1:0;
+        }
+    }
+    cells = temp;
+}
+
+function clear() {
+    console.log('asdas')
+    for (let i = 0; i < size; i++) {
+        for (let j = 0; j < size; j++) {
+            cells[i][j] = false;
+        }
+    }
+    refresh(false);
+}
+
+function iterate(gen, x, y) {
+    if (!gen) {
+        return cells[x][y];
+    }
+    let counter = 0;
+    if (cells[x+1]  && cells[x+1][y+1])   { counter++; }
+    if (cells[x+1]  && cells[x+1][y])     { counter++; }
+    if (cells[x+1]  && cells[x+1][y-1])   { counter++; }
+    if (cells[x]    && cells[x][y+1])     { counter++; }
+    if (cells[x]    && cells[x][y-1])     { counter++; }
+    if (cells[x-1]  && cells[x-1][y+1])   { counter++; }
+    if (cells[x-1]  && cells[x-1][y])     { counter++; }
+    if (cells[x-1]  && cells[x-1][y-1])   { counter++; }
     // die
     if (counter < 2 || counter > 3) { return false; }
     // survive
@@ -75,6 +74,3 @@ cell.prototype.iterate = function() {
     // birth
     if (counter === 3 && !this.state) { return true; }
 };
-
-init();
-update();
