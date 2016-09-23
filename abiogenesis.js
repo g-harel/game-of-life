@@ -1,4 +1,4 @@
-let size = 30;
+let size = 42;
 
 window.onload = function() {
     window.container = document.getElementById('container');
@@ -9,7 +9,7 @@ window.onload = function() {
         cells[address[0]][address[1]] = !cell;
         source.style.opacity = cell?0:1;
     });
-    let temp = '<table cellpadding="0" cellspacing="0">';
+    let temp = '<table cellpadding="0" cellspacing="1">';
     for (let i = 0; i < size; i++) {
         temp += '<tr>';
         for (let j = 0; j < size; j++) {
@@ -26,7 +26,7 @@ function reset() {
     for (let i = 0; i < size; i++) {
         cells[i] = [];
         for (let j = 0; j < size; j++) {
-            cells[i][j] = (Math.random()>1.5);
+            cells[i][j] = (Math.random()>0.9);
         }
     }
     refresh(false);
@@ -44,8 +44,7 @@ function refresh(gen) {
     cells = temp;
 }
 
-function clear() {
-    console.log('asdas')
+function erase() {
     for (let i = 0; i < size; i++) {
         for (let j = 0; j < size; j++) {
             cells[i][j] = false;
@@ -55,8 +54,9 @@ function clear() {
 }
 
 function iterate(gen, x, y) {
+    let current = cells[x][y];
     if (!gen) {
-        return cells[x][y];
+        return current;
     }
     let counter = 0;
     if (cells[x+1]  && cells[x+1][y+1])   { counter++; }
@@ -67,10 +67,20 @@ function iterate(gen, x, y) {
     if (cells[x-1]  && cells[x-1][y+1])   { counter++; }
     if (cells[x-1]  && cells[x-1][y])     { counter++; }
     if (cells[x-1]  && cells[x-1][y-1])   { counter++; }
-    // die
-    if (counter < 2 || counter > 3) { return false; }
-    // survive
-    if (counter === 2 || (counter === 3 && this.state)) { return true; }
-    // birth
-    if (counter === 3 && !this.state) { return true; }
+    // test survival
+    if (current) {
+        if (counter < 2) {
+            return false;
+        } else if (counter > 3) {
+            return false;
+        } else {
+            return true;    
+        }
+    } else {
+        if (counter === 3) {
+            return true;
+        } else {
+            return false
+        }
+    }
 };
