@@ -21,9 +21,11 @@
     </style>
 </head>
 <body>
-    <button onclick="refresh(true);">step</button>
-    <button onclick="reset();">refresh</button>
-    <button onclick="erase();">clear</button>
-    <div id="container"></div>
+    <button onmousedown="gen();" onmouseover="play();" onmouseout="pause();">step</button>
+    <button onmousedown="reset();">refresh</button>
+    <button onmousedown="erase();">clear</button>
+    <div id="container">
+        <table cellpadding="0" cellspacing="1"></table>
+    </div>
 </body>
 </html>
