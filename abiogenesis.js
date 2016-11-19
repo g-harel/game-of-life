@@ -14,19 +14,62 @@ let height = 60;
 let board = (new Array(height)).fill(new Array(width));
 
 // store the target cell opacity for mouseover
-let changeto = 1;
+let changeto = true;
 
-// create canvas and fetch imageData 
+// store last changed cell
+let lastchanged = null;
+
+// create canvas and fill in the background
 let canvas = document.getElementById('canvas');
 let context = canvas.getContext('2d');
+/*context.fillStyle = '#eee';
+context.fillRect(0, 0, canvas.height, canvas.width);*/
 
-window.onclick =  function() {
+// event listener for cell toggles
+canvas.onmousedown = function(e) {
+    e_togglecell(e);
+    canvas.onmousemove = hover_togglecell;
+    window.onmouseup = function() {
+        canvas.onmousemove = undefined;
+    }
+}
+
+function e_togglecell(e) {
+    let m = (e.pageX - e.target.offsetLeft)/canvas.height*height>>0;
+    let n = (e.pageY - e.target.offsetTop)/canvas.width*width>>0;
+    let newval = !board[m][n]
+    board[m][n] = newval;
+    let cellheight = canvas.height/height >> 0;
+    let cellwidth = canvas.width/width >> 0;
+    context.fillStyle = newval?'black':'white';
+    context.fillRect(m*cellheight, n*cellwidth, cellheight, cellwidth);
+    changeto = newval;
+}
+
+function hover_togglecell(e) {
+    let m = (e.pageX - e.target.offsetLeft)/canvas.height*height>>0;
+    let n = (e.pageY - e.target.offsetTop)/canvas.width*width>>0;
+    if (lastchanged && lastchanged[0] === m && lastchanged[1] === n) {
+        return;
+    }
+    let cellheight = canvas.height/height >> 0;
+    let cellwidth = canvas.width/width >> 0;
+    context.fillStyle = changeto?'black':'white';
+    context.fillRect(m*cellheight, n*cellwidth, cellheight, cellwidth);
+    lastchanged = [m,n];
+}
+
+// fill board with random values
+//board = reset(board)
+draw(board);
+
+/*window.onmousedown =  function() {
     let newboard = gen(board);
     board = newboard;
     draw(newboard);
-}
+}*/
 
-let count = 500;
+/*let count = 500;
 function genloop() {
     board = gen(board);
     draw(board);
@@ -36,10 +79,11 @@ function genloop() {
     }
 }
 board = reset(board)
-genloop();
+genloop();*/
 
 // draws cells to canvas with fillRect
 function draw(board) {
+    context.clearRect(0, 0, canvas.width, canvas.height);
     let cellheight = canvas.height/height >> 0;
     let cellwidth = canvas.width/width >> 0;
     let m = height-1;
@@ -47,8 +91,9 @@ function draw(board) {
         let n = width-1;
         let verticalpos = m*cellheight;
         while (n + 1) {
-            context.fillStyle = board[m][n]?'black':'white';
-            context.fillRect(verticalpos, n*cellwidth, cellheight, cellwidth);
+            if (board[m][n]) {
+                context.fillRect(verticalpos, n*cellwidth, cellheight, cellwidth);
+            }
             --n;
         }
         --m;
@@ -57,10 +102,10 @@ function draw(board) {
 
 // map over all cells of the internal board
 function map2d(store, eval) {
-    let temp = store.slice();
+    let temp = [];
     let m = height-1;
     while (m + 1) {
-        temp[m] = temp[m].slice();
+        temp[m] = []/*temp[m].slice()*/;
         let n = width-1;
         while (n + 1) {
             temp[m][n] = eval(m, n, store);
