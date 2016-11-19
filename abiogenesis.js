@@ -7,11 +7,11 @@ let neighbors = [
 ]
 
 // board size
-let width = 6;
-let height = 6;
+let width = 60;
+let height = 60;
 
-// initialize blank board
-let board = (new Array(height)).fill((new Array(width).fill(true)));
+// initialize blank board of HEIGHTxWIDTH
+let board = (new Array(height)).fill(new Array(width));
 
 // store the target cell opacity for mouseover
 let changeto = 1;
@@ -19,54 +19,54 @@ let changeto = 1;
 // create canvas and fetch imageData 
 let canvas = document.getElementById('canvas');
 let context = canvas.getContext('2d');
-var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-
-// calculate canvas
-function draw(board) {
-    let data = imageData.data;
-    let length = data.length;
-    let w = canvas.width;
-    let h = canvas.height;
-    for (let i = 0; i < length; ++i) {
-        let j = i/4 >> 0;
-        let color = board[j/w/h*height>>0][j%w/w*width>>0]?0:255;
-        data[i] = color; ++i;
-        data[i] = color; ++i;
-        data[i] = color; ++i;
-        data[i] = 255;
-    }
-    context.putImageData(imageData, 0, 0);
-}
-
-board = reset(board);
-draw(board);
 
 window.onclick =  function() {
-    console.log('gen');
     let newboard = gen(board);
     board = newboard;
     draw(newboard);
 }
 
-/*let count = 500;
+let count = 500;
 function genloop() {
+    board = gen(board);
     draw(board);
-    board = reset(board);
     if (count !== 0) {
         --count;
         requestAnimationFrame(genloop);
     }
 }
-genloop();*/
+board = reset(board)
+genloop();
 
-// loop over all cells
+// draws cells to canvas with fillRect
+function draw(board) {
+    let cellheight = canvas.height/height >> 0;
+    let cellwidth = canvas.width/width >> 0;
+    let m = height-1;
+    while (m + 1) {
+        let n = width-1;
+        let verticalpos = m*cellheight;
+        while (n + 1) {
+            context.fillStyle = board[m][n]?'black':'white';
+            context.fillRect(verticalpos, n*cellwidth, cellheight, cellwidth);
+            --n;
+        }
+        --m;
+    }
+}
+
+// map over all cells of the internal board
 function map2d(store, eval) {
     let temp = store.slice();
-    for (let i = 0; i < height; ++i) {
-        temp[i] = temp[i].slice();
-        for (let j = 0; j < width; ++j) {
-            temp[i][j] = eval(i, j, store);
+    let m = height-1;
+    while (m + 1) {
+        temp[m] = temp[m].slice();
+        let n = width-1;
+        while (n + 1) {
+            temp[m][n] = eval(m, n, store);
+            --n;
         }
+        --m;
     }
     return temp;
 }
@@ -75,9 +75,11 @@ function map2d(store, eval) {
 function gen(board) {
     return map2d(board, (i, j, store) => {
         let count = 0;
-        for (let k = 0; k < neighbors.length; ++k) {
-            let m = neighbors[k][0]+i;
-            let n = neighbors[k][1]+j;
+        let o = neighbors.length-1;
+        while (o + 1) {
+            let m = neighbors[o][0]+i;
+            let n = neighbors[o][1]+j;
+            --o;
             if (m < 0 || m >= height || n < 0 || n >= width) {
                 continue;
             }
