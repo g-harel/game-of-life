@@ -1,98 +1,84 @@
 
 // storing the values to loop around a cell
-let neighbors = [
+var neighbors = [
     [-1,-1],[-1, 0],[-1, 1],
     [ 0,-1],/*[00]*/[ 0, 1],
     [ 1,-1],[ 1, 0],[ 1, 1]
 ]
 
-// board size
-let width = 60;
-let height = 60;
+// create canvas
+var canvas = document.getElementById('canvas');
+var context = canvas.getContext('2d');
 
-// initialize blank board of HEIGHTxWIDTH
-let board = (new Array(height)).fill(new Array(width));
+// storing canvas dimensions
+var w = canvas.width;
+var h = canvas.height;
+
+// saving cell dimensions
+var celldimensions = 10;
+
+// calculating board size
+var width = w/celldimensions>>0;
+var height = h/celldimensions>>0;
+
+// initialize board
+var board = [];
 
 // store the target cell opacity for mouseover
-let changeto = true;
+var changeto = true;
 
 // store last changed cell
-let lastchanged = null;
+var lastchanged = null;
 
-// create canvas and fill in the background
-let canvas = document.getElementById('canvas');
-let context = canvas.getContext('2d');
-/*context.fillStyle = '#eee';
-context.fillRect(0, 0, canvas.height, canvas.width);*/
+// controls if animation is playing
+var playing = false;
 
-// event listener for cell toggles
-canvas.onmousedown = function(e) {
-    e_togglecell(e);
-    canvas.onmousemove = hover_togglecell;
-    window.onmouseup = function() {
-        canvas.onmousemove = undefined;
-    }
-}
-
-function e_togglecell(e) {
-    let m = (e.pageX - e.target.offsetLeft)/canvas.height*height>>0;
-    let n = (e.pageY - e.target.offsetTop)/canvas.width*width>>0;
-    let newval = !board[m][n]
+// toggles cell to the opposite status
+function click_toggle(m, n) {
+    var newval = !board[m][n]
     board[m][n] = newval;
-    let cellheight = canvas.height/height >> 0;
-    let cellwidth = canvas.width/width >> 0;
-    context.fillStyle = newval?'black':'white';
-    context.fillRect(m*cellheight, n*cellwidth, cellheight, cellwidth);
+    changecell(m, n, newval);
     changeto = newval;
 }
 
-function hover_togglecell(e) {
-    let m = (e.pageX - e.target.offsetLeft)/canvas.height*height>>0;
-    let n = (e.pageY - e.target.offsetTop)/canvas.width*width>>0;
+// toggles cell to same value as first one
+function hover_toggle(m, n) {
     if (lastchanged && lastchanged[0] === m && lastchanged[1] === n) {
         return;
     }
-    let cellheight = canvas.height/height >> 0;
-    let cellwidth = canvas.width/width >> 0;
-    context.fillStyle = changeto?'black':'white';
-    context.fillRect(m*cellheight, n*cellwidth, cellheight, cellwidth);
+    changecell(m,n, changeto);
+}
+
+// changes cell to specified value
+function changecell(m, n, val) {
+    if (val) {
+        context.fillRect(n*celldimensions, m*celldimensions, celldimensions, celldimensions);
+    } else {
+        context.clearRect(n*celldimensions, m*celldimensions, celldimensions, celldimensions);
+    }
+    board[m][n] = !!val;
     lastchanged = [m,n];
 }
 
-// fill board with random values
-//board = reset(board)
-draw(board);
-
-/*window.onmousedown =  function() {
-    let newboard = gen(board);
-    board = newboard;
-    draw(newboard);
-}*/
-
-/*let count = 500;
+// loops through the generations until "playing" is false
 function genloop() {
-    board = gen(board);
-    draw(board);
-    if (count !== 0) {
-        --count;
+    if (playing) {
+        board = gen(board);
+        draw(board);
         requestAnimationFrame(genloop);
     }
 }
-board = reset(board)
-genloop();*/
 
 // draws cells to canvas with fillRect
 function draw(board) {
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    let cellheight = canvas.height/height >> 0;
-    let cellwidth = canvas.width/width >> 0;
-    let m = height-1;
+    context.clearRect(0, 0, w, h);
+    var m = height-1;
     while (m + 1) {
-        let n = width-1;
-        let verticalpos = m*cellheight;
+        var n = width-1;
+        var verticalpos = m*celldimensions;
         while (n + 1) {
-            if (board[m][n]) {
-                context.fillRect(verticalpos, n*cellwidth, cellheight, cellwidth);
+            if (board[m] && board[m][n]) {
+                context.fillRect(n*celldimensions, verticalpos, celldimensions, celldimensions);
             }
             --n;
         }
@@ -100,15 +86,39 @@ function draw(board) {
     }
 }
 
-// map over all cells of the internal board
-function map2d(store, eval) {
-    let temp = [];
-    let m = height-1;
-    while (m + 1) {
-        temp[m] = []/*temp[m].slice()*/;
-        let n = width-1;
-        while (n + 1) {
-            temp[m][n] = eval(m, n, store);
+// calculate the new generation
+function gen(board) {
+    var temp = [];
+    var m = height-1;
+    while (m > -1) {
+        temp[m] = [];
+        var n = width-1;
+        while (n > -1) {
+            var count = 0;
+            var o = neighbors.length-1;
+            while (o > -1) {
+                var _m = (neighbors[o][0]+m+height)%height;
+                var _n = (neighbors[o][1]+n+width)%width;
+                --o;
+                if (board[_m] && board[_m][_n]) {
+                    ++count;
+                }
+            }
+            if (board[m] && board[m][n]) {
+                if (count === 2) {
+                    temp[m][n] = true;
+                } else if (count === 3) {
+                    temp[m][n] = true;
+                } else {
+                    temp[m][n] = false;
+                }
+            } else {
+                if (count === 3) {
+                    temp[m][n] = true;
+                } else {
+                    temp[m][n] = false
+                }
+            }
             --n;
         }
         --m;
@@ -116,42 +126,54 @@ function map2d(store, eval) {
     return temp;
 }
 
-// calculate the new generation
-function gen(board) {
-    return map2d(board, (i, j, store) => {
-        let count = 0;
-        let o = neighbors.length-1;
-        while (o + 1) {
-            let m = neighbors[o][0]+i;
-            let n = neighbors[o][1]+j;
-            --o;
-            if (m < 0 || m >= height || n < 0 || n >= width) {
-                continue;
-            }
-            count += +board[m][n];
+// map over all cells of the internal board (not fast enough for gen function)
+function map2d(store, cb) {
+    var temp = [];
+    var m = height-1;
+    while (m > -1) {
+        temp[m] = [];
+        var n = width-1;
+        while (n > -1) {
+            temp[m][n] = cb(m, n, store);
+            --n;
         }
-        if (board[i][j]) {
-            if (count === 2 || count === 3) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            if (count === 3) {
-                return true;
-            } else {
-                return false
-            }
-        }
-    });
+        --m;
+    }
+    return temp;
 }
 
 // randomize board
 function reset(board) {
-    return map2d(board, () => (Math.random() > 0.6));
+    return map2d(board, function() {
+        return Math.random() < 0.44;
+    });
 }
 
 // clear the board
 function erase(board) {
-    return map2d(board, () => false);
+    return map2d(board, function() {
+        return false;
+    });
 }
+
+// recalculating variables and redraw
+function resize() {
+    var parent = canvas.parentNode;
+    w = parent.clientWidth;
+    h = w*2/3;
+    canvas.width = w;
+    canvas.height = h;
+    celldimensions = Math.max(6, h/70 >> 0);
+    width = w/celldimensions>>0;
+    height = h/celldimensions>>0;
+    draw(board);
+}
+
+// draw initial board
+window.onload = function() {
+    board = reset(board);
+    resize();
+}
+
+// adjust board for new screen dimensions
+window.onresize = resize;
