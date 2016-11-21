@@ -1,0 +1,28 @@
+body {
+    min-width: 300px;
+}
+
+/* board controls */
+.btn-group-justified {
+    box-shadow: 3px 3px 0 rgba(0,0,0,0.1);
+}
+
+/* removing ugly blue outline when focused */
+.btn {
+    outline: none !important;
+}
+
+/* canvas container */
+#easel {
+    width: 100%;
+    cursor: default;
+}
+
+/* board & controls container */
+#petri {
+    box-shadow: 3px 3px 0 rgba(0,0,0,0.1);
+    border: 5px solid #d9534f;
+    border-radius: 14px;
+    padding: 10px;
+    margin: 20px;
+}
