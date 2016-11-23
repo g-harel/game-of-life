@@ -11,36 +11,18 @@
 </head>
 <body>
     <div class="container">
-        <div id="petri">
-            <div id="easel">
-                <canvas id="canvas" width="1140" height="760"></canvas>
+        <div class="row">
+            <div class"col-xs-12 col-md-4">
+                <board data-editable="true"></board>
             </div>
-            <div class="btn-group btn-group-justified" role="group">
-                <div class="btn-group" role="group">
-                    <button type="button" title="randomize" class="btn btn-danger" onclick="board=reset(board);draw(board);">
-                        <span class="glyphicon glyphicon-random"></span>
-                    </button>
-                </div>
-                <div class="btn-group" role="group">
-                    <button type="button" title="reset" class="btn btn-danger" onclick="board=erase(board);draw(board);">
-                        <span class="glyphicon glyphicon-refresh"></span>
-                    </button>
-                </div>
-                <div class="btn-group" role="group">
-                    <button type="button" title="step" class="btn btn-danger" onclick="board=gen(board);draw(board);">
-                        <span class="glyphicon glyphicon-step-forward"></span>
-                    </button>
-                </div>
-                <div class="btn-group" role="group">
-                    <button type="button" title="play/pause" class="btn btn-danger" onclick="playing=!playing;genloop();">
-                        <span class="glyphicon glyphicon-play"></span>
-                        <span class="glyphicon glyphicon-pause"></span>
-                    </button>
-                </div>
+            <div class"col-xs-12 col-md-4">
+                <board data-editable="false"></board>
+            </div>
+            <div class"col-xs-12 col-md-4">
+                <board data-editable="true"></board>
             </div>
         </div>
     </div>
-    <script src="interface.js"></script>
     <script src="abiogenesis.js"></script>
 </body>
 </html>
