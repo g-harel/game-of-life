@@ -1,0 +1,55 @@
+/* these can leave on real css */
+.gol-canvas-wrapper > canvas {
+    width: 100%;
+    height: 400px;
+    background-color: blue;
+}
+
+body, html {
+    padding: 0px;
+    margin: 0px;
+}
+/* */
+
+
+
+.gol-wrapper {
+    box-shadow: 3px 3px 0 rgba(0,0,0,0.1);
+    border: 5px solid #d9534f;
+    box-sizing: border-box;
+    border-radius: 14px;
+    min-width: 300px;
+    width: 100%;
+}
+
+.gol-canvas-wrapper {
+    padding: 10px 10px 0;
+}
+
+.gol-button-wrapper {
+    padding: 5px 0 12px 10px;
+}
+
+.gol-button-wrapper > table {
+    table-layout: fixed;
+}
+
+.gol-button-wrapper td {
+    padding: 0 10px 0 0;
+}
+
+.gol-button {
+    box-shadow: 1px 3px 0 #d9534f, 3px 5px 0 rgba(0,0,0,0.1);
+    border: 3px solid #d9534f;
+    border-radius: 5px;
+    text-align: center;
+    user-select: none;
+    color: #d9534f;
+    cursor: pointer;
+    padding: 10px;
+}
+
+.gol-button:active {
+    transform: translateY(3px) translateX(1px);
+    box-shadow: none;
+}
