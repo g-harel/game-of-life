@@ -6,35 +6,22 @@
         [ 1,-1],[ 1, 0],[ 1, 1]
     ];
 
-    // find all boards and fill em up
-    var boards = document.querySelectorAll('board');
-    for (var i = 0; i <	boards.length; i++) {
-        create(boards[i]);
-    }
+    // start executing when all DOM has been loaded
+    document.addEventListener("DOMContentLoaded", function(event) {
+        // find all boards
+        var boards = document.querySelectorAll('board');
 
-    // creates a game-of-life board in place of element passed as argument
-    function create(origin) {
-        // store the target cell opacity for mouseover
-        var changeto = true;
+        // add style to body if boards are found
+        if (boards.length) {
+            // adding font-awesome to the head
+            var fa = document.createElement('link');
+            fa.rel = 'stylesheet';
+            fa.href = 'https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css';
+            document.head.appendChild(fa);
 
-        // store last changed cell
-        var lastchanged = null;
-
-        // controls if animation is playing
-        var playing = false;
-
-        // creating the board
-        var board = [];
-
-        // storing parent element
-        var parent = origin.parentNode;
-
-        // storing if the board is editable
-        var editable = origin.getAttribute('data-editable') === 'true';
-
-        // create wrapper DOM and place in document
-        parent.innerHTML = `
-        <style>
+            // adding custom styles for boards
+            var style = document.createElement('style');
+            style.innerHTML = `
             .gol-wrapper {
                 box-shadow: 3px 3px 0 rgba(0,0,0,0.1);
                 border: 5px solid #d9534f;
@@ -74,47 +61,44 @@
             .gol-button:active {
                 transform: translateY(3px) translateX(1px);
                 box-shadow: none;
-            }
-        </style>
-        <div class="gol-wrapper">
-            <div class="gol-canvas-wrapper">
-                <canvas></canvas>
-            </div>
-            <div class="gol-button-wrapper">
-                <table width="100%" cellpadding="0" cellspacing="0">
-                    <tr>
-                        <td style="
-                            padding: 0 10px 0 0;">
-                            <div class="gol-button" title="random">
-                                <i class="fa fa-random fa-lg"></i>
-                            </div>
-                        </td>
-                        <td style="
-                            padding: 0 10px 0 0;">
-                            <div class="gol-button" title="erase">
-                                <i class="fa fa-refresh fa-lg"></i>
-                            </div>
-                        </td>
-                        <td style="
-                            padding: 0 10px 0 0;">
-                            <div class="gol-button" title="step">
-                                <i class="fa fa-step-forward fa-lg"></i>
-                            </div>
-                        </td>
-                        <td style="
-                            padding: 0 10px 0 0;">
-                            <div class="gol-button" title="play/pause">
-                                <i class="fa fa-play"></i>
-                                <i class="fa fa-pause"></i>
-                            </div>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-        </div>`;
+            }`;
+            document.body.appendChild(style);
+        }
+
+        // replacing the board elements with a board
+        for (var i = 0; i <	boards.length; i++) {
+            create(boards[i]);
+        }
+    });
+
+    // creates a game-of-life board in place of element passed as argument
+    function create(origin) {
+        // store the target cell opacity for mouseover
+        var changeto = true;
+
+        // store last changed cell
+        var lastchanged = null;
+
+        // controls if animation is playing
+        var playing = false;
+
+        // creating the board
+        var board = [];
+
+        // storing parent element
+        var parent = origin.parentNode;
+
+        // removing the board element from the parent
+        parent.removeChild(origin);
+
+        // storing if the board is editable
+        var editable = origin.getAttribute('data-editable') === 'true';
+
+        // create wrapper DOM and place in document
+        var wrapper = create_wrapper(parent, editable);
 
         // creating the canvas
-        var canvas = parent.children[1].children[0].children[0];
+        var canvas = wrapper.children[0].children[0];
         var context = canvas.getContext('2d');
 
         // set remaining dimension values and fill board with empty vals
@@ -127,34 +111,29 @@
         // adjust board for new screen dimensions
         window.addEventListener('resize', resize);
 
-        // randomize button listener
-        parent
-            .children[1].children[1].children[0]
-            .children[0].children[0].children[0]
-            .addEventListener('click', reset);
-
-        // reset button listener
-        parent
-            .children[1].children[1].children[0]
-            .children[0].children[0].children[1]
-            .addEventListener('click', erase);
-
         // step button listener
-        parent
-            .children[1].children[1].children[0]
-            .children[0].children[0].children[2]
+        wrapper.children[1].children[0].children[0].children[0].children[0]
             .addEventListener('click', function() {
                 board = gen(board);
             });
 
         // playpause button listener
-        parent
-            .children[1].children[1].children[0]
-            .children[0].children[0].children[3]
+        wrapper.children[1].children[0].children[0].children[0].children[1]
             .addEventListener('click', function() {
                 playing = !playing;
                 genloop();
             });
+        
+        // conditionally add listeners to randomize and reset buttons
+        if (editable) {
+            // randomize button listener
+            wrapper.children[1].children[0].children[0].children[0].children[2]
+                .addEventListener('click', reset);
+
+            // reset button listener
+            wrapper.children[1].children[0].children[0].children[0].children[3]
+                .addEventListener('click', erase);
+        }
 
         // event listener for cell toggles
         canvas.onmousedown = function(e) {
@@ -316,5 +295,46 @@
                 --m;
             }
         }
+    }
+
+    // append the game of life wrapper to the parent element
+    function create_wrapper(parent, editable) {
+        var wrapper = document.createElement('div');
+        wrapper.className = 'gol-wrapper';
+        wrapper.innerHTML = `
+        <div class="gol-canvas-wrapper">
+            <canvas></canvas>
+        </div>
+        <div class="gol-button-wrapper">
+            <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td colspan="4">
+                        <div class="gol-button" title="step">
+                            <i class="fa fa-step-forward fa-lg"></i>
+                        </div>
+                    </td>
+                    <td colspan="4">
+                        <div class="gol-button" title="play/pause">
+                            <i class="fa fa-play"></i>
+                            <i class="fa fa-pause"></i>
+                        </div>
+                    </td>
+                    ${editable?
+                        `<td>
+                            <div class="gol-button" title="random">
+                                <i class="fa fa-random fa-lg"></i>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="gol-button" title="erase">
+                                <i class="fa fa-refresh fa-lg"></i>
+                            </div>
+                        </td>`
+                    :''}
+                </tr>
+            </table>
+        </div>`;
+        parent.appendChild(wrapper);
+        return wrapper;
     }
 }());
