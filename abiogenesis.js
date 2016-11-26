@@ -24,10 +24,11 @@
             style.innerHTML = `
             .gol-wrapper {
                 box-shadow: 3px 3px 0 rgba(0,0,0,0.1);
-                border: 5px solid #d9534f;
+                min-width: 410px !important;
+                border: 5px solid #2e6da4;
                 box-sizing: border-box;
-                border-radius: 14px;
-                min-width: 300px;
+                border-radius: 10px;
+                margin: 0 0 16px;
                 width: 100%;
             }
 
@@ -48,12 +49,12 @@
             }
 
             .gol-button {
-                box-shadow: 1px 3px 0 #d9534f, 3px 5px 0 rgba(0,0,0,0.1);
-                border: 3px solid #d9534f;
+                box-shadow: 1px 3px 0 #2e6da4, 3px 5px 0 rgba(0,0,0,0.1);
+                border: 3px solid #2e6da4;
                 border-radius: 5px;
                 text-align: center;
                 user-select: none;
-                color: #d9534f;
+                color: #2e6da4;
                 cursor: pointer;
                 padding: 10px;
             }
@@ -88,7 +89,7 @@
         // storing parent element
         var parent = origin.parentNode;
 
-        // removing the board element from the parent
+        // removing the placeholder board element from the parent
         parent.removeChild(origin);
 
         // storing if the board is editable
@@ -104,6 +105,9 @@
         // set remaining dimension values and fill board with empty vals
         var w,h,celldimension,width,height;
         resize();
+
+        // ugly workaround to fix an issue with canvas size on initial page load
+        setTimeout(resize, 0);
 
         // randomize board and draw to canvas
         reset();
@@ -135,21 +139,25 @@
                 .addEventListener('click', erase);
         }
 
-        // event listener for cell toggles
-        canvas.onmousedown = function(e) {
-            let m = (e.pageY - e.target.offsetTop)/celldimensions>>0;
-            let n = (e.pageX - e.target.offsetLeft)/celldimensions>>0;
-            click_toggle(m, n);
-            canvas.onmousemove = function(e) {
-                let m = (e.pageY - e.target.offsetTop)/celldimensions>>0;
-                let n = (e.pageX - e.target.offsetLeft)/celldimensions>>0;
-                hover_toggle(m,n);
-            }
-            window.onmouseup = function() {
-                canvas.onmousemove = undefined;
-            }
-            canvas.onmouseout = function() {
-                canvas.onmousemove = undefined;
+        // allow drawing when editable
+        if (editable) {
+            // event listener for cell toggles
+            canvas.onmousedown = function(e) {
+                var rect = canvas.getBoundingClientRect();
+                let m = (e.clientY - rect.top)/celldimensions>>0;
+                let n = (e.clientX - rect.left)/celldimensions>>0;
+                click_toggle(m, n);
+                canvas.onmousemove = function(e) {
+                    let m = (e.clientY - rect.top)/celldimensions>>0;
+                    let n = (e.clientX - rect.left)/celldimensions>>0;
+                    hover_toggle(m,n);
+                }
+                window.onmouseup = function() {
+                    canvas.onmousemove = undefined;
+                }
+                canvas.onmouseout = function() {
+                    canvas.onmousemove = undefined;
+                }
             }
         }
 
@@ -162,7 +170,7 @@
             canvas.height = h;
 
             // cell height/width
-            celldimensions = 10 || Math.max(6, h/70 >> 0);
+            celldimensions = 10;
 
             // number of vertical and horizontal cells
             width = w/celldimensions >> 0;
@@ -196,7 +204,8 @@
         // calculate and display the new generation
             /* draw() function is intentionally not used for slightly better performance */
         function gen(board) {
-            context.clearRect(0, 0, w, h);
+            // clearing the board (slightly faster than clearRect)
+            canvas.width = canvas.width;
             var temp = [];
             var m = height-1;
             while (m > -1) {
@@ -297,7 +306,7 @@
         }
     }
 
-    // append the game of life wrapper to the parent element
+    // append the game-of-life wrapper to the parent element
     function create_wrapper(parent, editable) {
         var wrapper = document.createElement('div');
         wrapper.className = 'gol-wrapper';
@@ -308,12 +317,12 @@
         <div class="gol-button-wrapper">
             <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
-                    <td colspan="4">
+                    <td colspan="3">
                         <div class="gol-button" title="step">
                             <i class="fa fa-step-forward fa-lg"></i>
                         </div>
                     </td>
-                    <td colspan="4">
+                    <td colspan="3">
                         <div class="gol-button" title="play/pause">
                             <i class="fa fa-play"></i>
                             <i class="fa fa-pause"></i>
