@@ -187,6 +187,8 @@
 
         // recalculating variables
         function resize() {
+            // variable to determine if a redraw is necessary
+            var redraw = true;
 
             // storing target width
             var target_width = canvas.parentNode.parentNode.parentNode.parentNode.clientWidth - 60;
@@ -198,45 +200,64 @@
 
             // different calculations if absolute dimensions are specified
             if (abs_dimensions) {
+                // storing past cell dimensions
+                var prev = celldimensions;
+
                 // recalculating pixel dimensions
                 celldimensions = target_width/width >> 0;
+
+                // deciding if redraw is necessary
+                if (prev === celldimensions) {
+                    redraw = false;
+                }
 
                 // finding canvas' dimensions
                 w = width*celldimensions;
                 h = height*celldimensions;
             } else {
+                // storing past canvas width
+                var prev = w;
+
                 // canvas' pixel dimensions
                 w = target_width;
                 h = w*ratio;
+
+                // deciding if redraw is necessary
+                if (prev === w) {
+                    redraw = false;
+                }
 
                 // number of vertical and horizontal cells
                 width = w/celldimensions >> 0;
                 height = h/celldimensions >> 0;
             }
 
-            //resizing the canvas
-            canvas.width = w;
-            canvas.height = h;
+            // redraws with new values
+            if (redraw) {
+                //resizing the canvas
+                canvas.width = w;
+                canvas.height = h;
 
-            // making the button collapse to canvas' width
-            wrapper.children[0].children[1].style.width = w + 20 + 'px';
+                // making the button collapse to canvas' width
+                wrapper.children[0].children[1].style.width = w + 20 + 'px';
 
-            // pad or contract board
-            var temp = [];
-            var m = height-1;
-            while (m > -1) {
-                temp[m] = [];
-                var n = width-1;
-                while (n > -1) {
-                    temp[m][n] = (board[m] && board[m][n]) || false;
-                    --n;
+                // pad or contract board
+                var temp = [];
+                var m = height-1;
+                while (m > -1) {
+                    temp[m] = [];
+                    var n = width-1;
+                    while (n > -1) {
+                        temp[m][n] = (board[m] && board[m][n]) || false;
+                        --n;
+                    }
+                    --m;
                 }
-                --m;
-            }
-            board = temp;
+                board = temp;
 
-            // draw to screen
-            draw(board);
+                // draw to screen
+                draw(board);
+            }
         }
 
         // loops through the generations until "playing" is false
