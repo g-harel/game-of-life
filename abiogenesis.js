@@ -23,13 +23,17 @@
             var style = document.createElement('style');
             style.innerHTML = `
             .gol-wrapper {
+                display: table;
+                width: 100%;
+            }
+
+            .gol-border-wrapper {
                 box-shadow: 3px 3px 0 rgba(0,0,0,0.1);
-                min-width: 410px !important;
                 border: 5px solid #2e6da4;
                 box-sizing: border-box;
                 border-radius: 10px;
                 margin: 0 0 16px;
-                width: 100%;
+                float: left;
             }
 
             .gol-canvas-wrapper {
@@ -92,18 +96,36 @@
         // removing the placeholder board element from the parent
         parent.removeChild(origin);
 
-        // storing if the board is editable
-        var editable = origin.getAttribute('data-editable') === 'true';
+        // storing if the board is static
+        var static = origin.getAttribute('gol-static') === 'true';
+
+        // storing custom pixel ratio
+        var ratio = Number(origin.getAttribute('gol-ratio')) || 0.6;
+
+        // storing custom pixel dimensions
+        var celldimensions = Number(origin.getAttribute('gol-pixel')) >> 0 || 8;
+
+        // storing custom absolute board width
+        var width = Number(origin.getAttribute('gol-width')) >> 0;
+
+        // making sure width >= 10 and calculating height
+        if (width) {
+            if (width < 10) {
+                width = 10;
+            }
+            var abs_dimensions = true;
+            var height = width * ratio >> 0;
+        }
 
         // create wrapper DOM and place in document
-        var wrapper = create_wrapper(parent, editable);
+        var wrapper = create_wrapper(parent, static);
 
         // creating the canvas
-        var canvas = wrapper.children[0].children[0];
+        var canvas = wrapper.children[0].children[0].children[0];
         var context = canvas.getContext('2d');
 
         // set remaining dimension values and fill board with empty vals
-        var w,h,celldimension,width,height;
+        var w,h,width,height;
         resize();
 
         // ugly workaround to fix an issue with canvas size on initial page load
@@ -113,43 +135,45 @@
         reset();
         
         // adjust board for new screen dimensions
-        window.addEventListener('resize', resize);
+        window.addEventListener('resize', function() {
+            requestAnimationFrame(resize);
+        });
 
         // step button listener
-        wrapper.children[1].children[0].children[0].children[0].children[0]
+        wrapper.children[0].children[1].children[0].children[0].children[0].children[0]
             .addEventListener('click', function() {
                 board = gen(board);
             });
 
         // playpause button listener
-        wrapper.children[1].children[0].children[0].children[0].children[1]
+        wrapper.children[0].children[1].children[0].children[0].children[0].children[1]
             .addEventListener('click', function() {
                 playing = !playing;
                 genloop();
             });
         
         // conditionally add listeners to randomize and reset buttons
-        if (editable) {
+        if (!static) {
             // randomize button listener
-            wrapper.children[1].children[0].children[0].children[0].children[2]
+            wrapper.children[0].children[1].children[0].children[0].children[0].children[2]
                 .addEventListener('click', reset);
 
             // reset button listener
-            wrapper.children[1].children[0].children[0].children[0].children[3]
+            wrapper.children[0].children[1].children[0].children[0].children[0].children[3]
                 .addEventListener('click', erase);
         }
 
         // allow drawing when editable
-        if (editable) {
+        if (!static) {
             // event listener for cell toggles
             canvas.onmousedown = function(e) {
                 var rect = canvas.getBoundingClientRect();
-                let m = (e.clientY - rect.top)/celldimensions>>0;
-                let n = (e.clientX - rect.left)/celldimensions>>0;
+                let m = (e.clientY - rect.top)/celldimensions >> 0;
+                let n = (e.clientX - rect.left)/celldimensions >> 0;
                 click_toggle(m, n);
                 canvas.onmousemove = function(e) {
-                    let m = (e.clientY - rect.top)/celldimensions>>0;
-                    let n = (e.clientX - rect.left)/celldimensions>>0;
+                    let m = (e.clientY - rect.top)/celldimensions >> 0;
+                    let n = (e.clientX - rect.left)/celldimensions >> 0;
                     hover_toggle(m,n);
                 }
                 window.onmouseup = function() {
@@ -163,18 +187,39 @@
 
         // recalculating variables
         function resize() {
-            // canvas' pixel dimensions
-            w = canvas.parentNode.clientWidth - 20;
-            h = w*2/3;
+
+            // storing target width
+            var target_width = canvas.parentNode.parentNode.parentNode.parentNode.clientWidth - 60;
+
+            // making sure target_width >= 410
+            if (target_width < 410) {
+                target_width = 410;
+            }
+
+            // different calculations if absolute dimensions are specified
+            if (abs_dimensions) {
+                // recalculating pixel dimensions
+                celldimensions = target_width/width >> 0;
+
+                // finding canvas' dimensions
+                w = width*celldimensions;
+                h = height*celldimensions;
+            } else {
+                // canvas' pixel dimensions
+                w = target_width;
+                h = w*ratio;
+
+                // number of vertical and horizontal cells
+                width = w/celldimensions >> 0;
+                height = h/celldimensions >> 0;
+            }
+
+            //resizing the canvas
             canvas.width = w;
             canvas.height = h;
 
-            // cell height/width
-            celldimensions = 10;
-
-            // number of vertical and horizontal cells
-            width = w/celldimensions >> 0;
-            height = h/celldimensions >> 0;
+            // making the button collapse to canvas' width
+            wrapper.children[0].children[1].style.width = w + 20 + 'px';
 
             // pad or contract board
             var temp = [];
@@ -189,8 +234,9 @@
                 --m;
             }
             board = temp;
+
+            // draw to screen
             draw(board);
-            //console.log(board.toString());
         }
 
         // loops through the generations until "playing" is false
@@ -284,6 +330,7 @@
 
         // fill 2d array with false values
         function erase() {
+            playing = false;
             board = board.map((row) => row.map(() => false));
             draw(board);
         }
@@ -307,41 +354,43 @@
     }
 
     // append the game-of-life wrapper to the parent element
-    function create_wrapper(parent, editable) {
+    function create_wrapper(parent, static) {
         var wrapper = document.createElement('div');
         wrapper.className = 'gol-wrapper';
         wrapper.innerHTML = `
-        <div class="gol-canvas-wrapper">
-            <canvas></canvas>
-        </div>
-        <div class="gol-button-wrapper">
-            <table width="100%" cellpadding="0" cellspacing="0">
-                <tr>
-                    <td colspan="3">
-                        <div class="gol-button" title="step">
-                            <i class="fa fa-step-forward fa-lg"></i>
-                        </div>
-                    </td>
-                    <td colspan="3">
-                        <div class="gol-button" title="play/pause">
-                            <i class="fa fa-play"></i>
-                            <i class="fa fa-pause"></i>
-                        </div>
-                    </td>
-                    ${editable?
-                        `<td>
-                            <div class="gol-button" title="random">
-                                <i class="fa fa-random fa-lg"></i>
+        <div class="gol-border-wrapper">
+            <div class="gol-canvas-wrapper">
+                <canvas></canvas>
+            </div>
+            <div class="gol-button-wrapper">
+                <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td colspan="3">
+                            <div class="gol-button" title="step">
+                                <i class="fa fa-step-forward fa-lg"></i>
                             </div>
                         </td>
-                        <td>
-                            <div class="gol-button" title="erase">
-                                <i class="fa fa-refresh fa-lg"></i>
+                        <td colspan="3">
+                            <div class="gol-button" title="play/pause">
+                                <i class="fa fa-play"></i>
+                                <i class="fa fa-pause"></i>
                             </div>
-                        </td>`
-                    :''}
-                </tr>
-            </table>
+                        </td>
+                        ${!static?
+                            `<td>
+                                <div class="gol-button" title="random">
+                                    <i class="fa fa-random fa-lg"></i>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="gol-button" title="erase">
+                                    <i class="fa fa-refresh fa-lg"></i>
+                                </div>
+                            </td>`
+                        :''}
+                    </tr>
+                </table>
+            </div>
         </div>`;
         parent.appendChild(wrapper);
         return wrapper;
