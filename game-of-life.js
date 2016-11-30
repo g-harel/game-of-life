@@ -96,7 +96,7 @@
         var width = Number( origin.getAttribute( 'gol-width' )) >> 0;
 
         // making sure width >= 10 and calculating height
-        if ( width ) {
+        if ( width !== undefined ) {
             if ( width < 10 ) {
                 width = 10;
             }
@@ -217,24 +217,28 @@
             var temp = [];
             var len = width * height;
             var m = len;
-            var count;
-            var cellval;
-            var start;
-            var offset;
+            var count, cellval, x_inc, x_dec, y_inc, y_dec, m_inc, m_dec;
             while ( m ) {  --m;
                 count = 0;
-                offset = m%width;
-                start = m - offset;
-                if ( board[( offset + 1 + width )%width + start ] === true ) { ++count; }
-                if ( board[( offset - 1 + width )%width + start ] === true ) { ++count; }
-                start = ( ( m + width ) - offset + len )% len;
-                if ( board[( offset + width )%width + start ] === true ) { ++count; }
-                if ( board[( offset + 1 + width )%width + start ] === true ) { ++count; }
-                if ( board[( offset - 1 + width )%width + start ] === true ) { ++count; }
-                start = ( ( m - width ) - offset + len )% len;
-                if ( board[( offset + width )%width + start ] === true ) { ++count; }
-                if ( board[( offset + 1 + width )%width + start ] === true ) { ++count; }
-                if ( board[( offset - 1 + width )%width + start ] === true ) { ++count; }
+                // calculating increments / decrements
+                x_inc = ( m + 1 )%width - m%width;
+                x_dec = ( m - 1 + width)%width - m%width;
+                y_inc = ( m + width )%len - m%len;
+                y_dec = ( m - width + len)%len - m%len;
+                // precalculating horizontal incremented / decremented value
+                m_inc = m + x_inc;
+                m_dec = m + x_dec;
+                // horizontal neighbors
+                if ( board[ m_inc ] === true ) { ++count; }
+                if ( board[ m_dec ] === true ) { ++count; }
+                // neighbors below
+                if ( board[ m + y_inc ] === true ) { ++count; }
+                if ( board[ m_inc + y_inc] === true ) { ++count; }
+                if ( board[ m_dec + y_inc] === true ) { ++count; }
+                // neighbors above
+                if ( board[ m + y_dec ] === true ) { ++count; }
+                if ( board[ m_inc + y_dec] === true ) { ++count; }
+                if ( board[ m_dec + y_dec] === true ) { ++count; }
                 if ( board[m] ) {
                     if ( count === 2 ) {
                         cellval = true;
