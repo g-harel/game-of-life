@@ -69,6 +69,49 @@
         }
     } );
 
+    // append the game-of-life wrapper to the parent element
+    function create_wrapper( parent, static ) {
+        var wrapper = document.createElement( 'div' );
+        wrapper.className = 'gol-wrapper';
+        wrapper.innerHTML = `
+        <div class="gol-border-wrapper">
+            <div class="gol-canvas-wrapper">
+                <canvas></canvas>
+            </div>
+            <div class="gol-button-wrapper">
+                <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td colspan="3">
+                            <div class="gol-button" title="step">
+                                <i class="fa fa-step-forward fa-lg"></i>
+                            </div>
+                        </td>
+                        <td colspan="3">
+                            <div class="gol-button" title="play/pause">
+                                <i class="fa fa-play"></i>
+                                <i class="fa fa-pause"></i>
+                            </div>
+                        </td>
+                        ${!static?
+                            `<td>
+                                <div class="gol-button" title="random">
+                                    <i class="fa fa-random fa-lg"></i>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="gol-button" title="erase">
+                                    <i class="fa fa-refresh fa-lg"></i>
+                                </div>
+                            </td>`
+                        :''}
+                    </tr>
+                </table>
+            </div>
+        </div>`;
+        parent.appendChild( wrapper );
+        return wrapper;
+    }
+
     // creates a game-of-life board in place of element passed as argument
     function create( origin ) {
         // store the target cell opacity for mouseover
@@ -90,15 +133,21 @@
         var static = origin.getAttribute( 'gol-static' ) === 'true';
 
         // storing custom pixel ratio
-        var ratio = Number( origin.getAttribute( 'gol-ratio' )) || 0.6;
+        var ratio = Number( origin.getAttribute( 'gol-ratio' ) ) || 0.6;
 
         // storing custom absolute board width
-        var width = Number( origin.getAttribute( 'gol-width' )) >> 0;
+        var width = Number( origin.getAttribute( 'gol-width' ) ) >> 0;
+
+        // storing custom absolute board width
+        var construct = origin.getAttribute( 'gol-construct' ) || '';
 
         // making sure width >= 10 and calculating height
         if ( width !== undefined ) {
             if ( width < 10 ) {
                 width = 10;
+            }
+            if ( width > 360 ) {
+                width = 360;
             }
             var height = width * ratio >> 0;
         }
@@ -113,15 +162,19 @@
         var canvas = wrapper.children[0].children[0].children[0];
         var context = canvas.getContext( '2d' );
 
-        // set remaining dimension values and fill board with empty vals
+        // set remaining dimension values
         var celldimensions,w,h;
         resize();
 
-        // ugly workaround to fix an issue with canvas size on initial page load
+        // ugly workaround to fix an issue with canvas size on page load
         setTimeout( resize, 0 );
 
-        // randomize board and draw to canvas
-        reset();
+        // set initial board state and draw to canvas
+        if ( construct && constructs[construct] ) {
+            buildme( construct );
+        } else {
+            reset();
+        }
         
         // adjust board for new screen dimensions
         window.addEventListener( 'resize', function() {
@@ -217,52 +270,37 @@
             var temp = [];
             var len = width * height;
             var m = len;
-            var count, cellval, x_inc, x_dec, y_inc, y_dec, m_inc, m_dec;
+            var count, x_inc, x_dec, y_inc, y_dec, m_inc, m_dec;
             while ( m ) {  --m;
                 count = 0;
                 // calculating increments / decrements
                 x_inc = ( m + 1 )%width - m%width;
                 x_dec = ( m - 1 + width)%width - m%width;
                 y_inc = ( m + width )%len - m%len;
-                y_dec = ( m - width + len)%len - m%len;
+                y_dec = ( m - width + len )%len - m%len;
                 // precalculating horizontal incremented / decremented value
                 m_inc = m + x_inc;
                 m_dec = m + x_dec;
                 // horizontal neighbors
-                if ( board[ m_inc ] === true ) { ++count; }
-                if ( board[ m_dec ] === true ) { ++count; }
+                if ( board[m_inc] === true ) { ++count; }
+                if ( board[m_dec] === true ) { ++count; }
                 // neighbors below
-                if ( board[ m + y_inc ] === true ) { ++count; }
-                if ( board[ m_inc + y_inc] === true ) { ++count; }
-                if ( board[ m_dec + y_inc] === true ) { ++count; }
+                if ( board[m + y_inc] === true ) { ++count; }
+                if ( board[m_inc + y_inc] === true ) { ++count; }
+                if ( board[m_dec + y_inc] === true ) { ++count; }
                 // neighbors above
-                if ( board[ m + y_dec ] === true ) { ++count; }
-                if ( board[ m_inc + y_dec] === true ) { ++count; }
-                if ( board[ m_dec + y_dec] === true ) { ++count; }
-                if ( board[m] ) {
-                    if ( count === 2 ) {
-                        cellval = true;
-                    }
-                    else if ( count === 3 ) {
-                        cellval = true;
-                    }
-                    else {
-                        cellval = false;
-                    }
-                } else {
-                    if ( count === 3 ) {
-                        cellval = true;
-                    }
-                    else {
-                        cellval = false
-                    }
-                }
-                if ( cellval ) {
+                if ( board[m + y_dec] === true ) { ++count; }
+                if ( board[m_inc + y_dec] === true ) { ++count; }
+                if ( board[m_dec + y_dec] === true ) { ++count; }
+                // deciding on next gen and drawing
+                if ( count === 3 || ( count === 2 && board[m] === true ) ) {
+                    temp[m] = true;
                     context.fillRect( (m%width)*celldimensions, (m/width>>0)*celldimensions, celldimensions, celldimensions );
+                } else {
+                    temp[m] = false;
                 }
-                temp[m] = cellval;
             }
-            board = temp;
+            board = temp.slice();
             if ( playing ) {
                 requestAnimationFrame( gen );
             }
@@ -321,48 +359,146 @@
                 }
             }
         }
+
+        // draws specified construct to the board
+        function buildme( construct_name ) {
+            var c = constructs[construct_name];
+            var c_width = c[0].length;
+            var c_height = c.length;
+            if ( ( c_width + 2 >= width ) || ( c_height + 2 >= height ) ) {
+                console.log(`Could not display ${construct_name} because the board is too small`);
+                reset();
+                return;
+            }
+            var start_index = ( ( width - c_width + 1 )/2 >> 0 ) + ( ( height - c_height + 1 )/2 >> 0 ) * width;
+            for (let i = 0; i < c.length; ++i) {
+                for (let j = 0; j < c[i].length; ++j) {
+                    board[start_index + i*width + j] = !! c[i][j];
+                }
+            }
+            draw( board );
+        }
     }
 
-    // append the game-of-life wrapper to the parent element
-    function create_wrapper( parent, static ) {
-        var wrapper = document.createElement( 'div' );
-        wrapper.className = 'gol-wrapper';
-        wrapper.innerHTML = `
-        <div class="gol-border-wrapper">
-            <div class="gol-canvas-wrapper">
-                <canvas></canvas>
-            </div>
-            <div class="gol-button-wrapper">
-                <table width="100%" cellpadding="0" cellspacing="0">
-                    <tr>
-                        <td colspan="3">
-                            <div class="gol-button" title="step">
-                                <i class="fa fa-step-forward fa-lg"></i>
-                            </div>
-                        </td>
-                        <td colspan="3">
-                            <div class="gol-button" title="play/pause">
-                                <i class="fa fa-play"></i>
-                                <i class="fa fa-pause"></i>
-                            </div>
-                        </td>
-                        ${!static?
-                            `<td>
-                                <div class="gol-button" title="random">
-                                    <i class="fa fa-random fa-lg"></i>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="gol-button" title="erase">
-                                    <i class="fa fa-refresh fa-lg"></i>
-                                </div>
-                            </td>`
-                        :''}
-                    </tr>
-                </table>
-            </div>
-        </div>`;
-        parent.appendChild( wrapper );
-        return wrapper;
+    // game of life structures of interest, can be added into any canvas (of big enough size)
+    // credits to https://github.com/dcodeIO/dcodeio.github.io/blob/master/js/GameOfLife/structures.js for the structures
+    var constructs = {
+        // spaceships
+        "glider": [
+            [0,0,1],
+            [1,0,1],
+            [0,1,1]
+        ],
+
+        "ship": [
+            [1,0,0,1,0],
+            [0,0,0,0,1],
+            [1,0,0,0,1],
+            [0,1,1,1,1]
+        ],
+
+        "dart": [
+            [0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,1,0,1,0,0,0,0,0,0],
+            [0,0,0,0,0,1,0,0,0,1,0,0,0,0,0],
+            [0,0,0,0,0,0,1,1,1,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,1,1,0,0,0,1,1,0,0,0,0],
+            [0,0,1,0,0,0,1,0,1,0,0,0,1,0,0],
+            [0,1,1,0,0,0,1,0,1,0,0,0,1,1,0],
+            [1,0,0,0,0,0,1,0,1,0,0,0,0,0,1],
+            [0,1,0,1,1,0,1,0,1,0,1,1,0,1,0]
+        ],
+
+        "schick": [
+            [0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0],
+            [0,0,0,0,0,0,1,1,1,0,0,0,0,0,1,1,0,0,0,0],
+            [0,0,0,0,0,0,1,1,0,1,1,0,0,0,0,0,0,1,1,1],
+            [0,0,0,0,0,0,1,1,1,0,0,0,0,0,1,1,0,0,0,0],
+            [1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0],
+            [1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        ],
+
+        "barge": [
+            [0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],
+            [0,0,0,0,0,1,1,1,1,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,1,1,1,1,0,0,0,0,0],
+            [0,1,1,0,1,1,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,1,1,0,1,1,0],
+            [0,1,1,0,0,1,0,0,0,0,0,1,1,1,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,1,1,1,0,0,0,0,0,1,0,0,1,1,0],
+            [1,0,0,1,0,0,0,0,0,0,0,1,0,1,0,1,1,1,1,1,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,1,1,1,1,1,0,1,0,1,0,0,0,0,0,0,0,1,0,0,1],
+            [0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,1,0,1,0,0,0,1,0,1,1,0,0,0,1,1,0,1,0,0,0,1,0,1,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,1,0,1,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,1,0,0,0,0,0,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,1,1,1,1,0,0,0,1,1,1,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,1,0,1,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,1,0,1,0,1,0,1,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,1,0,0,0,1,0,1,0,0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,1,1,0,1,1,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,1,0,0,1,0,1,0,0,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        ],
+
+        // oscillators
+        "pulsar": [
+            [0,0,1,1,1,0,0,0,1,1,1,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [1,0,0,0,0,1,0,1,0,0,0,0,1],
+            [1,0,0,0,0,1,0,1,0,0,0,0,1],
+            [1,0,0,0,0,1,0,1,0,0,0,0,1],
+            [0,0,1,1,1,0,0,0,1,1,1,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,1,1,1,0,0,0,1,1,1,0,0],
+            [1,0,0,0,0,1,0,1,0,0,0,0,1],
+            [1,0,0,0,0,1,0,1,0,0,0,0,1],
+            [1,0,0,0,0,1,0,1,0,0,0,0,1],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,1,1,1,0,0,0,1,1,1,0,0]
+        ],
+
+        "roteightor": [
+            [0,1,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,1,1,1,0,0,0,0,0,0,0,0,1,1],
+            [0,0,0,0,1,0,0,0,0,0,0,0,1,0],
+            [0,0,0,1,0,0,0,0,0,0,1,0,1,0],
+            [0,0,0,1,0,0,0,1,0,0,1,1,0,0],
+            [0,0,0,0,0,0,0,0,1,0,0,0,0,0],
+            [0,0,0,0,0,1,0,0,1,0,0,0,0,0],
+            [0,0,0,0,0,0,1,1,1,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,1,1,0,0,0,0,0,0,0,0,0,0],
+            [0,1,0,1,0,0,0,0,0,1,1,0,0,0],
+            [0,1,0,0,0,0,0,0,0,1,0,0,0,0],
+            [1,1,0,0,0,0,0,0,0,0,1,1,1,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,1,0]
+        ],
+
+        "dancers": [
+            [0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,1,0,0,1,1,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0],
+            [0,0,1,0,1,1,0,0,0,1,1,1,0,0,0,0,0],
+            [0,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0],
+            [1,1,0,0,1,1,0,0,0,0,0,0,0,0,1,0,0],
+            [0,1,0,1,0,0,0,0,0,0,0,0,0,1,0,1,0],
+            [0,0,1,0,0,0,0,0,0,0,0,1,1,0,0,1,1],
+            [0,0,0,0,0,0,0,0,0,0,0,1,1,0,1,1,0],
+            [0,0,0,0,0,1,1,1,0,0,0,1,1,0,1,0,0],
+            [0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,1,1,0,0,1,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0]
+        ]
     }
 }() );
