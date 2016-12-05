@@ -16,15 +16,15 @@
             var style = document.createElement( 'style' );
             style.innerHTML = `
             .gol-wrapper {
+                user-select: none;
                 display: table;
                 width: 100%;
             }
 
             .gol-border-wrapper {
-                box-shadow: 3px 3px 0 rgba( 0,0,0,0.1 );
-                border: 5px solid #2e6da4;
-                box-sizing: border-box;
-                border-radius: 10px;
+                background-color: rgba(255,255,255,0.8);
+                box-shadow: 1px 1px 0 rgba(0,0,0,0.1);
+                border: 1px solid #ccc;
                 margin: 0 0 16px;
                 float: left;
             }
@@ -34,7 +34,7 @@
             }
 
             .gol-button-wrapper {
-                padding: 5px 0 12px 10px;
+                padding: 5px 0 10px 10px;
             }
 
             .gol-button-wrapper > table {
@@ -46,18 +46,19 @@
             }
 
             .gol-button {
-                box-shadow: 1px 3px 0 #2e6da4, 3px 5px 0 rgba( 0,0,0,0.1 );
-                border: 3px solid #2e6da4;
-                border-radius: 5px;
+                box-shadow: 1px 1px 0 rgba( 0,0,0,0.1 );
+                font-size: 10px;
+                border: 1px solid #ccc;
+                border-radius: 2px;
                 text-align: center;
                 user-select: none;
-                color: #2e6da4;
                 cursor: pointer;
                 padding: 10px;
+                color: #aaa;
             }
 
             .gol-button:active {
-                transform: translateY( 3px ) translateX( 1px );
+                transform: translateY( 1px ) translateX( 1px );
                 box-shadow: none;
             }`;
             document.head.appendChild( style );
@@ -70,7 +71,7 @@
     } );
 
     // append the game-of-life wrapper to the parent element
-    function create_wrapper( parent, static ) {
+    function create_wrapper( parent, board, static ) {
         var wrapper = document.createElement( 'div' );
         wrapper.className = 'gol-wrapper';
         wrapper.innerHTML = `
@@ -108,7 +109,7 @@
                 </table>
             </div>
         </div>`;
-        parent.appendChild( wrapper );
+        parent.replaceChild( wrapper, board );
         return wrapper;
     }
 
@@ -125,9 +126,6 @@
 
         // storing parent element
         var parent = origin.parentNode;
-
-        // removing the placeholder board element from the parent
-        parent.removeChild( origin );
 
         // storing if the board is static
         var static = origin.getAttribute( 'gol-static' ) === 'true';
@@ -156,7 +154,7 @@
         var board = new Array( width * height ).fill( false );
 
         // create wrapper DOM and place in document
-        var wrapper = create_wrapper( parent, static );
+        var wrapper = create_wrapper( parent, origin, static );
 
         // creating the canvas
         var canvas = wrapper.children[0].children[0].children[0];
@@ -165,9 +163,6 @@
         // set remaining dimension values
         var celldimensions,w,h;
         resize();
-
-        // ugly workaround to fix an issue with canvas size on page load
-        setTimeout( resize, 0 );
 
         // set initial board state and draw to canvas
         if ( construct && constructs[construct] ) {
@@ -186,9 +181,15 @@
             // storing target width
             var target_width = canvas.parentNode.parentNode.parentNode.parentNode.clientWidth - 60;
 
-            // making sure target_width >= 410
-            if ( target_width < 410 ) {
-                target_width = 410;
+            // making sure target_width is big enough for buttons to display properly
+            if ( static ) {
+                if ( target_width < 150 ) {
+                    target_width = 150;
+                }
+            } else {
+                if ( target_width < 410 ) {
+                    target_width = 410;
+                }
             }
 
             // storing past cell dimensions
