@@ -25,6 +25,7 @@
                 background-color: rgba(255,255,255,0.8);
                 box-shadow: 1px 1px 0 rgba(0,0,0,0.1);
                 border: 1px solid #ccc;
+                border-radius: 2px;
                 margin: 0 0 16px;
                 float: left;
             }
@@ -49,7 +50,7 @@
                 box-shadow: 1px 1px 0 rgba( 0,0,0,0.1 );
                 font-size: 10px;
                 border: 1px solid #ccc;
-                border-radius: 2px;
+                border-radius: 1px;
                 text-align: center;
                 user-select: none;
                 cursor: pointer;
@@ -134,7 +135,7 @@
         var ratio = Number( origin.getAttribute( 'gol-ratio' ) ) || 0.6;
 
         // storing custom absolute board width
-        var width = Number( origin.getAttribute( 'gol-width' ) ) >> 0;
+        var width = Number( origin.getAttribute( 'gol-width' ) ) >> 0 || 100;
 
         // storing custom absolute board width
         var construct = origin.getAttribute( 'gol-construct' ) || '';
@@ -198,6 +199,11 @@
             // recalculating pixel dimensions
             celldimensions = target_width/width >> 0;
             
+            // preventing wonky boards
+            if ( width*celldimensions < 410 ) {
+                ++celldimensions;
+            }
+
             // finding canvas' dimensions
             w = width*celldimensions;
             h = height*celldimensions;

@@ -19,54 +19,85 @@
                 game-of-life
                 <small class="text-muted">.js</small>
             </h1>
-            <p>This website is a showcase of Conway's Game of life implemented with the html5 canvas component. Feel free to play around with the board below, or keep reading for details about the game and my implementation.</p>
-            <p><small class="text-muted">HINT: try drawing on the board below!</small></p>
-            <board gol-width="100" gol-ratio="0.4"></board>
+            <p>This website is a showcase of Conway's Game of life implemented with the html5 canvas component. Feel free to play around with the board below, or keep reading for details about the game and this implementation.</p>
+            <p><small class="text-muted">HINT: try drawing on the board!</small></p>
+            <board gol-width="270" gol-ratio="0.4"></board>
         </div>
     </div>
     <div class="container">
         <div class="row">
             <div class="col-sm-12">
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupigolt non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                <p class="h3">Wikipedia</p>
+                <p>The universe of the Game of Life is an infinite two-dimensional orthogonal grid of square cells, each of which is in one of two possible states, alive or dead, or "populated" or "unpopulated" (the difference may seem minor, except when viewing it as an early model of human/urban behavior simulation or how one views a blank space on a grid). Every cell interacts with its eight neighbours, which are the cells that are horizontally, vertically, or diagonally adjacent. At each step in time, the following transitions occur:</p>
+                <ul class="list-group">
+                    <li class="list-group-item">Any live cell with fewer than two live neighbours dies, as if caused by under-population.</li>
+                    <li class="list-group-item">Any live cell with two or three live neighbours lives on to the next generation.</li>
+                    <li class="list-group-item">Any live cell with more than three live neighbours dies, as if by over-population.</li>
+                    <li class="list-group-item">Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.</li>
+                </ul>
             </div>
         </div>
         <div class="row">
-            <div class="col-md-2">
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupigolt non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+            <hr>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <p>To start using game-of-life.js, simply add the single file to your page. You can now start creating <code>&lt;board&gt;</code> tags that will be automatically replaced with game-of-life boards on page load. Board attributes give you many options on how you want it to operate.</p>
+            </div>
+        </div>
+        <div class="row">
+            <hr>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <h4>Here are some examples<br></h4>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <p><code>&lt;board gol-static="true"&gt;</code></p>
+                <p><samp>gol-static</samp> will prevent the user from editing the contents of a board.</p>
+                <board gol-static="true" gol-width="40" gol-ratio="1"></board>
+            </div>
+            <div class="col-sm-6">
+                <p><code>&lt;board gol-construct="dancers"&gt;</code></p>
+                <p><samp>gol-construct</samp> will initize a board with the specified pattern.</p>
                 <board gol-static="true" gol-width="40" gol-ratio="1" gol-construct="dancers"></board>
-            </div>
-            <div class="col-md-2"></div>
-            <div class="col-md-4">
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupigolt non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-                <board gol-static="true" gol-width="39" gol-ratio="1" gol-construct="dart"></board>
-            </div>
-            <div class="col-md-4">
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupigolt non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-                <board gol-static="true" gol-width="39" gol-ratio="1" gol-construct="dart"></board>
             </div>
         </div>
         <div class="row">
             <div class="col-xs-12">
-                <board gol-static="true" gol-width="100" gol-ratio="0.4" gol-construct="barge"></board>
-            </div>
-        </div>
-    </div>
-        <!--<div class="row">
-            <div class="col-md-6 col-xs-8">
-                <board gol-editable="true"></board>
-            </div>
-            <div class="col-md-6 col-xs-8">
-                <board gol-editable="false"></board>
+                <p><code>&lt;board gol-ratio="20"&gt;</code></p>
+                <p><samp>gol-ratio</samp> allows to specify the relative thickness of the board</p>
+                <board gol-ratio="0.2"></board>
             </div>
         </div>
         <div class="row">
-            <div class="col-md-6 col-xs-8">
-                <board gol-editable="true"></board>
+            <div class="col-xs-12">
+                <p><code>&lt;board gol-width="20"&gt;</code></p>
+                <p><samp>gol-width</samp> allows to specify the amount of pixels on the board</p>
+                <board gol-static="true" gol-width="50" gol-ratio="0.2"></board>
             </div>
-            <div class="col-md-6 col-xs-8">
-                <board gol-editable="false"></board>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <p>The boards will always try to fit their container while keeping an integer amount of pixel for each cell.</p>
             </div>
-        </div>-->
+        </div>
+        <div class="row">
+            <div class="col-sm-3 col-xs-4">
+                <board gol-static="true" gol-width="10" gol-construct="glider"></board>
+            </div>
+            <div class="col-sm-3 col-xs-4">
+                <board gol-static="true" gol-width="20" gol-construct="ship"></board>
+            </div>
+            <div class="col-sm-3 col-xs-4">
+                <board gol-static="true" gol-width="10" gol-construct="glider"></board>
+            </div>
+            <div class="col-sm-3 col-xs-4 hidden-xs">
+                <board gol-static="true" gol-width="20" gol-construct="ship"></board>
+            </div>
+        </div>
     </div>
     <!-- bootstrap tags -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
