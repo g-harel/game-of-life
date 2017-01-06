@@ -171,7 +171,7 @@
         } else {
             reset();
         }
-        
+
         // adjust board for new screen dimensions
         window.addEventListener( 'resize', function() {
             requestAnimationFrame( resize );
@@ -197,16 +197,16 @@
             var prev = celldimensions;
 
             // recalculating pixel dimensions
-            celldimensions = target_width/width >> 0;
-            
+            celldimensions = target_width / width >> 0;
+
             // preventing wonky boards
-            if ( width*celldimensions < 410 ) {
+            if ( width * celldimensions < 410 ) {
                 ++celldimensions;
             }
 
             // finding canvas' dimensions
-            w = width*celldimensions;
-            h = height*celldimensions;
+            w = width * celldimensions;
+            h = height * celldimensions;
 
             // redraw if necessary
             if ( prev !== celldimensions ) {
@@ -235,7 +235,7 @@
                 playing = !playing;
                 gen();
             } );
-        
+
         // conditionally add listeners to randomize and reset buttons
         if ( !static ) {
             // randomize button listener
@@ -252,12 +252,12 @@
             // event listener for cell toggles
             canvas.onmousedown = function( e ) {
                 var rect = canvas.getBoundingClientRect();
-                let m = ( e.clientY - rect.top )/celldimensions >> 0;
-                let n = ( e.clientX - rect.left )/celldimensions >> 0;
+                let m = ( e.clientY - rect.top ) / celldimensions >> 0;
+                let n = ( e.clientX - rect.left ) / celldimensions >> 0;
                 click_toggle( m, n );
                 canvas.onmousemove = function( e ) {
-                    let m = ( e.clientY - rect.top )/celldimensions >> 0;
-                    let n = ( e.clientX - rect.left )/celldimensions >> 0;
+                    let m = ( e.clientY - rect.top ) / celldimensions >> 0;
+                    let n = ( e.clientX - rect.left ) / celldimensions >> 0;
                     hover_toggle( m,n );
                 }
                 window.onmouseup = function() {
@@ -281,10 +281,10 @@
             while ( m ) {  --m;
                 count = 0;
                 // calculating increments / decrements
-                x_inc = ( m + 1 )%width - m%width;
-                x_dec = ( m - 1 + width)%width - m%width;
-                y_inc = ( m + width )%len - m%len;
-                y_dec = ( m - width + len )%len - m%len;
+                x_inc = ( m + 1 ) % width - m % width;
+                x_dec = ( m - 1 + width) % width - m % width;
+                y_inc = ( m + width ) % len - m % len;
+                y_dec = ( m - width + len ) % len - m % len;
                 // precalculating horizontal incremented / decremented value
                 m_inc = m + x_inc;
                 m_dec = m + x_dec;
@@ -302,7 +302,7 @@
                 // deciding on next gen and drawing
                 if ( count === 3 || ( count === 2 && board[m] === true ) ) {
                     temp[m] = true;
-                    context.fillRect( (m%width)*celldimensions, (m/width>>0)*celldimensions, celldimensions, celldimensions );
+                    context.fillRect( (m % width) * celldimensions, (m / width >> 0) * celldimensions, celldimensions, celldimensions );
                 } else {
                     temp[m] = false;
                 }
@@ -334,9 +334,9 @@
         // changes cell to specified value
         function changecell( index, m, n, val ) {
             if ( val ) {
-                context.fillRect( n*celldimensions, m*celldimensions, celldimensions, celldimensions );
+                context.fillRect( n * celldimensions, m * celldimensions, celldimensions, celldimensions );
             } else {
-                context.clearRect( n*celldimensions, m*celldimensions, celldimensions, celldimensions );
+                context.clearRect( n * celldimensions, m * celldimensions, celldimensions, celldimensions );
             }
             board[index] = !!val;
             lastchanged = index;
@@ -362,7 +362,7 @@
             var m = height * width;
             while ( m ) { --m;
                 if ( board[m] ) {
-                    context.fillRect( (m%width)*celldimensions, (m/width>>0)*celldimensions, celldimensions, celldimensions );
+                    context.fillRect( (m % width) * celldimensions, (m / width >> 0) * celldimensions, celldimensions, celldimensions );
                 }
             }
         }
@@ -377,10 +377,10 @@
                 reset();
                 return;
             }
-            var start_index = ( ( width - c_width + 1 )/2 >> 0 ) + ( ( height - c_height + 1 )/2 >> 0 ) * width;
+            var start_index = ( ( width - c_width + 1 ) / 2 >> 0 ) + ( ( height - c_height + 1 ) / 2 >> 0 ) * width;
             for (let i = 0; i < c.length; ++i) {
                 for (let j = 0; j < c[i].length; ++j) {
-                    board[start_index + i*width + j] = !! c[i][j];
+                    board[start_index + i * width + j] = !! c[i][j];
                 }
             }
             draw( board );

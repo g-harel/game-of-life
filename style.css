@@ -6,3 +6,18 @@ body {
     font-family: 'Roboto', sans-serif;
     min-width: 600px;
 }
+
+.row > div[class^="col-"]:first-child {
+    padding-left: 0;
+}
+
+.row > div[class^="col-"]:last-child {
+    padding-right: 0;
+}
+
+.footer {
+    background-color: #f5f5f5;
+    text-align: center;
+    padding: 15px 0 6px;
+    width: 100%;
+}

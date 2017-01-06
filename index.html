@@ -20,86 +20,87 @@
                 game-of-life
                 <small class="text-muted">.js</small>
             </h1>
-            <p>This website is a showcase of Conway's Game of life implemented with the html5 canvas component. Feel free to play around with the board below, or keep reading for details about the game and this implementation.</p>
+            <p>This website is a showcase of Conway's Game of life implemented with the html5 canvas component. Feel free to play around with the board below, or keep reading for details about this implementation.</p>
             <p><small class="text-muted">HINT: try drawing on the board!</small></p>
             <board gol-width="270" gol-ratio="0.4"></board>
         </div>
     </div>
     <div class="container">
         <div class="row">
-            <div class="col-sm-12">
-                <p class="h3">Wikipedia</p>
-                <p>The universe of the Game of Life is an infinite two-dimensional orthogonal grid of square cells, each of which is in one of two possible states, alive or dead, or "populated" or "unpopulated" (the difference may seem minor, except when viewing it as an early model of human/urban behavior simulation or how one views a blank space on a grid). Every cell interacts with its eight neighbours, which are the cells that are horizontally, vertically, or diagonally adjacent. At each step in time, the following transitions occur:</p>
-                <ul class="list-group">
-                    <li class="list-group-item">Any live cell with fewer than two live neighbours dies, as if caused by under-population.</li>
-                    <li class="list-group-item">Any live cell with two or three live neighbours lives on to the next generation.</li>
-                    <li class="list-group-item">Any live cell with more than three live neighbours dies, as if by over-population.</li>
-                    <li class="list-group-item">Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.</li>
-                </ul>
+            <div class="col-12">
+                <p class="h5" style="line-height: 24px">To start using game-of-life.js, simply add the single file to your page. You can then start creating <code>&lt;board /&gt;</code> elements that will be automatically replaced with game-of-life boards on page load.</p>
+                <p class="h5" style="line-height: 24px">
+                    The boards have four buttons to control what is happening:
+                    <ul>
+                        <li class="h5">"Step" displays the next generation of the board</li>
+                        <li class="h5">"Play/Pause" starts or stops the generation loop</li>
+                        <li class="h5">"Randomize" randomizes every cell on the board (can be pressed while the loop is running)</li>
+                        <li class="h5">"Erase" makes the whole board empty (it will also pause the generation loop so that you can draw)</li>
+                    </ul>
+                </p>
             </div>
         </div>
         <div class="row">
             <hr>
         </div>
         <div class="row">
-            <div class="col-xs-12">
-                <p>To start using game-of-life.js, simply add the single file to your page. You can now start creating <code>&lt;board&gt;</code> tags that will be automatically replaced with game-of-life boards on page load. Board attributes give you many options on how you want it to operate.</p>
-            </div>
-        </div>
-        <div class="row">
-            <hr>
-        </div>
-        <div class="row">
-            <div class="col-xs-12">
-                <h4>Here are some examples<br></h4>
+            <div class="col-12">
+                <h4>Here are some examples of the attributes that can be given to board tags to change how they function<br></h4>
             </div>
         </div>
         <div class="row">
             <div class="col-sm-6">
-                <p><code>&lt;board gol-static="true"&gt;</code></p>
+                <p><code>&lt;board gol-static="true" /&gt;</code></p>
                 <p><samp>gol-static</samp> will prevent the user from editing the contents of a board.</p>
-                <board gol-static="true" gol-width="40" gol-ratio="1"></board>
+                <board gol-static="true" gol-width="40" gol-ratio="1"/>
             </div>
             <div class="col-sm-6">
-                <p><code>&lt;board gol-construct="dancers"&gt;</code></p>
+                <p><code>&lt;board gol-construct="dancers" /&gt;</code></p>
                 <p><samp>gol-construct</samp> will initize a board with the specified pattern.</p>
                 <board gol-static="true" gol-width="40" gol-ratio="1" gol-construct="dancers"></board>
             </div>
         </div>
         <div class="row">
-            <div class="col-xs-12">
-                <p><code>&lt;board gol-ratio="20"&gt;</code></p>
-                <p><samp>gol-ratio</samp> allows to specify the relative thickness of the board</p>
-                <board gol-ratio="0.2"></board>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-xs-12">
-                <p><code>&lt;board gol-width="20"&gt;</code></p>
-                <p><samp>gol-width</samp> allows to specify the amount of pixels on the board</p>
-                <board gol-static="true" gol-width="50" gol-ratio="0.2"></board>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-xs-12">
+            <div class="col-12">
                 <p>The boards will always try to fit their container while keeping an integer amount of pixel for each cell.</p>
             </div>
         </div>
         <div class="row">
             <div class="col-sm-3 col-xs-4">
-                <board gol-static="true" gol-width="10" gol-construct="glider"></board>
+                <board gol-static="true" gol-width="20" gol-construct="glider"></board>
             </div>
             <div class="col-sm-3 col-xs-4">
                 <board gol-static="true" gol-width="20" gol-construct="ship"></board>
             </div>
             <div class="col-sm-3 col-xs-4">
-                <board gol-static="true" gol-width="10" gol-construct="glider"></board>
+                <board gol-static="true" gol-width="20" gol-construct="glider"></board>
             </div>
             <div class="col-sm-3 col-xs-4 hidden-xs">
                 <board gol-static="true" gol-width="20" gol-construct="ship"></board>
             </div>
         </div>
+        <div class="row">
+            <div class="col-12">
+                <p><code>&lt;board gol-ratio="20" /&gt;</code></p>
+                <p><samp>gol-ratio</samp> allows to specify the relative thickness of the board</p>
+                <board gol-ratio="0.2"></board>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <p><code>&lt;board gol-width="20" /&gt;</code></p>
+                <p><samp>gol-width</samp> allows to specify the amount of pixels on the board</p>
+                <board gol-static="true" gol-width="50" gol-ratio="0.2"></board>
+            </div>
+        </div>
     </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p class="text-muted">Github repository: <a href="https://github.com/g-harel/game-of-life">https://github.com/g-harel/game-of-life</a>.</p>
+        </div>
+    </footer>
+
     <!-- bootstrap tags -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
