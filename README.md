@@ -1,5 +1,7 @@
-# game-of-life
+<p align="center">
+  <img src="https://i.gyazo.com/3edfd3722bb62d32421abe64c103f86f.png" width="300"/>
+</p>
 
 An implementation of Conway's Game of Life.
 
-Click the cells to toggle them, and use the buttons to step/reset/erase the board.
+See [here](https://g-harel.github.io/game-of-life/) for more info:
