@@ -4,4 +4,4 @@
 
 An implementation of Conway's Game of Life.
 
-See [here](https://g-harel.github.io/game-of-life/) for more info:
+See [here](https://g-harel.github.io/game-of-life/) for more info.
